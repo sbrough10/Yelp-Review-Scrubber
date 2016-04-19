@@ -1,4 +1,18 @@
 import json
+import os.path
+
+class TreeNode(object):
+  def __init__(self, value, left, right):
+    self.value = value
+    self.left = left
+    self.right = right
+
+  def setChild(self, node, branch):
+    if branch == "left":
+      self.left = node
+    else:
+      self.right = node
+
 
 def mergeSort(alist):
     if len(alist)>1:
@@ -32,37 +46,75 @@ def mergeSort(alist):
             k=k+1
 
 def treeify(alist):
-   node = []
+   nodes = []
    queue = [{"parent": None, "branch": None, "list": alist}]
+   i = 0
    while 0 < len(queue):
       qdict = queue.pop()
       qlist = qdict["list"]
-      if 0 < len(qlist):
-         mid = len(qlist) // 2
-         node.append({"value": qlist[mid], "left": None, "right": None})
-         if qdict["parent"] != None:
-            print(qdict["parent"])
-            qdict["parent"][qdict["branch"]] = node
-         queue.append({"parent": node, "branch": "right", "list": qlist[mid:]})
-         queue.append({"parent": node, "branch": "left", "list": qlist[:mid]})
-   return node[0]
+      if 1 < len(qlist):
+        mid = len(qlist) // 2
+        #print("length: ", len(qlist), "mid: ", mid)
+        node = Tree(qlist[mid], None, None)
+        if qdict["parent"] != None:
+          qdict["parent"].setChild(node, qdict["branch"])
+        nodes.append(node)
+        queue.append({"parent": node, "branch": "right", "list": qlist[mid:]})
+        queue.append({"parent": node, "branch": "left", "list": qlist[:mid]})
+   return nodes[0]
+
+
+# @param num, a list of integers
+# @return a tree node
+def sortedArrayToBST(num):
+    return sortedArrayToBSTRec(num, 0, len(num)-1)
+    
+def sortedArrayToBSTRec(num, begin, end):
+    if begin>end:
+        return None
+    midPoint = (begin+end)//2
+    root = TreeNode(num[midPoint], None, None)
+    root.left = sortedArrayToBSTRec(num, begin, midPoint-1)
+    root.right = sortedArrayToBSTRec(num, midPoint+1,end)
+    return root
 
 def searchTree(value, tree):
-   if value == tree["value"]:
+   if value == tree.value:
       return True
-   elif tree["left"] != None and value < tree["value"]:
-      return searchTree(value, tree["left"])
-   elif tree["right"] != None and tree["value"] < value:
-      return searchTree(value, tree["right"])
+   elif tree.left != None and value < tree.value:
+      return searchTree(value, tree.left)
+   elif tree.right != None and tree.right < value:
+      return searchTree(value, tree.right)
    else:
       return False
 
+def height(node):
+    if node is None:
+        return 0
+    else:
+        return max(height(node.left), height(node.right)) + 1
+
+def getTreeHeight(tree):
+  queue = [tree]
+  height = 1
+  while 0 < len(queue):
+    continues = False
+    for item in queue:
+      if item.left != None:
+        continues = True
+        queue.append(item.left)
+      if item.right != None:
+        continues = True
+        queue.append(item.right)
+    if continues:
+      height += 1
+  return height
 
 
 businesses = []
 minReviewCount = 10
 
-bizFile = open('../yelp_academic_dataset_business.json')
+bizFile = open(os.path.dirname(__file__) + '/../yelp_academic_dataset_business.json')
 for line in bizFile:
    jsonLn = json.loads(line)
    for category in jsonLn["categories"]:
@@ -73,11 +125,11 @@ for line in bizFile:
 print("Restaurants identified: ", len(businesses))
 mergeSort(businesses)
 print("Sorted restauraunt list")
-businessTree = treeify(businesses)
-print("Treeified restaurant list")
+businessTree = sortedArrayToBST(businesses)
+print("Treeified restaurant list: (height) ", height(businessTree))
 
 users = []
-usrFile = open('../yelp_academic_dataset_user.json')
+usrFile = open(os.path.dirname(__file__) + '/../yelp_academic_dataset_user.json')
 for line in usrFile:
    jsonLn = json.loads(line)
    if minReviewCount <= jsonLn["review_count"]:
@@ -85,15 +137,16 @@ for line in usrFile:
 
 print("Users selected: ", len(users))
 mergeSort(users)
-print("Sorted users")
+print("Sorted user list")
+userTree = sortedArrayToBST(users)
+print("Treeified users list: (height) ", height(userTree))
 
 reviews = []
-revFile = open('../yelp_academic_dataset_review.json')
+revFile = open(os.path.dirname(__file__) + '/../yelp_academic_dataset_review.json')
 i = 0
 for line in revFile:
    jsonLn = json.loads(line)
-   hashKey = jsonLn["business_id"][0:1]
-   if searchTree(jsonLn["business_id"], businessTree) and jsonLn["user_id"] in users:
+   if searchTree(jsonLn["business_id"], businessTree) and searchTree(jsonLn["user_id"], userTree):
       if 99 < i:
          print(len(reviews))
          i = 0
@@ -102,3 +155,4 @@ for line in revFile:
 
 print(reviews)
 print(len(reviews))
+
