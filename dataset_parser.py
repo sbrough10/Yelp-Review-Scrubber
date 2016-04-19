@@ -62,7 +62,7 @@ def searchTree(value, tree):
 businesses = []
 minReviewCount = 10
 
-bizFile = open('/Users/srb/Master Folder/My Education/College/Spring 2016/ECE 368/yelp_dataset_challenge_academic_dataset/yelp_academic_dataset_business.json')
+bizFile = open('../yelp_academic_dataset_business.json')
 for line in bizFile:
    jsonLn = json.loads(line)
    for category in jsonLn["categories"]:
@@ -77,7 +77,7 @@ businessTree = treeify(businesses)
 print("Treeified restaurant list")
 
 users = []
-usrFile = open('/Users/srb/Master Folder/My Education/College/Spring 2016/ECE 368/yelp_dataset_challenge_academic_dataset/yelp_academic_dataset_user.json')
+usrFile = open('../yelp_academic_dataset_user.json')
 for line in usrFile:
    jsonLn = json.loads(line)
    if minReviewCount <= jsonLn["review_count"]:
@@ -88,7 +88,7 @@ mergeSort(users)
 print("Sorted users")
 
 reviews = []
-revFile = open('/Users/srb/Master Folder/My Education/College/Spring 2016/ECE 368/yelp_dataset_challenge_academic_dataset/yelp_academic_dataset_review.json')
+revFile = open('../yelp_academic_dataset_review.json')
 i = 0
 for line in revFile:
    jsonLn = json.loads(line)
