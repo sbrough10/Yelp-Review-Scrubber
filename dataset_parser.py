@@ -14,20 +14,20 @@ class TreeNode(object):
       self.right = node
 
 
-def mergeSort(alist):
+def mergeSort(alist, orderedLtoG):
     if len(alist)>1:
         mid = len(alist)//2
         lefthalf = alist[:mid]
         righthalf = alist[mid:]
 
-        mergeSort(lefthalf)
-        mergeSort(righthalf)
+        mergeSort(lefthalf, orderedLtoG)
+        mergeSort(righthalf, orderedLtoG)
 
         i=0
         j=0
         k=0
         while i < len(lefthalf) and j < len(righthalf):
-            if lefthalf[i] < righthalf[j]:
+            if orderedLtoG(lefthalf[i], righthalf[j]):
                 alist[k]=lefthalf[i]
                 i=i+1
             else:
@@ -44,25 +44,6 @@ def mergeSort(alist):
             alist[k]=righthalf[j]
             j=j+1
             k=k+1
-
-def treeify(alist):
-   nodes = []
-   queue = [{"parent": None, "branch": None, "list": alist}]
-   i = 0
-   while 0 < len(queue):
-      qdict = queue.pop()
-      qlist = qdict["list"]
-      if 1 < len(qlist):
-        mid = len(qlist) // 2
-        #print("length: ", len(qlist), "mid: ", mid)
-        node = Tree(qlist[mid], None, None)
-        if qdict["parent"] != None:
-          qdict["parent"].setChild(node, qdict["branch"])
-        nodes.append(node)
-        queue.append({"parent": node, "branch": "right", "list": qlist[mid:]})
-        queue.append({"parent": node, "branch": "left", "list": qlist[:mid]})
-   return nodes[0]
-
 
 # @param num, a list of integers
 # @return a tree node
@@ -94,22 +75,6 @@ def height(node):
     else:
         return max(height(node.left), height(node.right)) + 1
 
-def getTreeHeight(tree):
-  queue = [tree]
-  height = 1
-  while 0 < len(queue):
-    continues = False
-    for item in queue:
-      if item.left != None:
-        continues = True
-        queue.append(item.left)
-      if item.right != None:
-        continues = True
-        queue.append(item.right)
-    if continues:
-      height += 1
-  return height
-
 
 businesses = []
 minReviewCount = 10
@@ -123,7 +88,7 @@ for line in bizFile:
          continue
 
 print("Restaurants identified: ", len(businesses))
-mergeSort(businesses)
+mergeSort(businesses, lambda left, right: left < right)
 print("Sorted restauraunt list")
 businessTree = sortedArrayToBST(businesses)
 print("Treeified restaurant list: (height) ", height(businessTree))
@@ -136,23 +101,17 @@ for line in usrFile:
       users.append(jsonLn["user_id"])
 
 print("Users selected: ", len(users))
-mergeSort(users)
+mergeSort(users, lambda left, right: left < right)
 print("Sorted user list")
 userTree = sortedArrayToBST(users)
 print("Treeified users list: (height) ", height(userTree))
 
 reviews = []
 revFile = open(os.path.dirname(__file__) + '/../yelp_academic_dataset_review.json')
-i = 0
 for line in revFile:
    jsonLn = json.loads(line)
    if searchTree(jsonLn["business_id"], businessTree) and searchTree(jsonLn["user_id"], userTree):
-      if 99 < i:
-         print(len(reviews))
-         i = 0
-      i += 1
       reviews.append(jsonLn)
 
-print(reviews)
-print(len(reviews))
+
 
