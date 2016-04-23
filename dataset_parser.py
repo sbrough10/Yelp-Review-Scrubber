@@ -8,13 +8,8 @@ class TreeNode(object):
     self.right = right
     self.searchValue = searchValue
 
-class UserBucket(object):
-  def __init__(self, user):
-    self.user = user
-    self.reviews = []
-
   def addReview(self, review):
-    self.review.append(review)
+    self.reviews.append(review)
 
 def setChild(self, node, branch):
   if branch == "left":
@@ -107,7 +102,7 @@ for line in usrFile:
    jsonLn = json.loads(line)
    if minReviewCount <= jsonLn["review_count"]:
       users.append(jsonLn)
-      jsonLn["bucket"] = UserBucket
+      jsonLn["reviews"] = []
 
 print("Users selected: ", len(users))
 mergeSort(users, lambda left, right: left["user_id"] < right["user_id"])
@@ -123,7 +118,7 @@ for line in revFile:
    business = searchTree(jsonLn["business_id"], businessTree)
    user = searchTree(jsonLn["user_id"], userTree)
    if business != None and user != None:
-      user["bucket"].reviews.append(jsonLn)
+      user["reviews"].append(jsonLn)
       reviews.append(jsonLn)
       fwrite.write(json.dumps(jsonLn) + "\n")
 
