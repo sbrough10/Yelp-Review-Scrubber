@@ -9,13 +9,18 @@ class TreeNode(object):
     self.searchValue = searchValue
 
 class UserBucket(object):
-  def __init__(self, value, left, right)
+  def __init__(self, user):
+    self.user = user
+    self.reviews = []
 
-  def setChild(self, node, branch):
-    if branch == "left":
-      self.left = node
-    else:
-      self.right = node
+  def addReview(self, review):
+    self.review.append(review)
+
+def setChild(self, node, branch):
+  if branch == "left":
+    self.left = node
+  else:
+    self.right = node
 
 def mergeSort(alist, orderedLtoG):
     if len(alist)>1:
@@ -102,6 +107,7 @@ for line in usrFile:
    jsonLn = json.loads(line)
    if minReviewCount <= jsonLn["review_count"]:
       users.append(jsonLn)
+      jsonLn["bucket"] = UserBucket
 
 print("Users selected: ", len(users))
 mergeSort(users, lambda left, right: left["user_id"] < right["user_id"])
@@ -116,10 +122,11 @@ for line in revFile:
    jsonLn = json.loads(line)
    business = searchTree(jsonLn["business_id"], businessTree)
    user = searchTree(jsonLn["user_id"], userTree)
-   if business != None and user != None :
+   if business != None and user != None:
+      user["bucket"].reviews.append(jsonLn)
       reviews.append(jsonLn)
       fwrite.write(json.dumps(jsonLn) + "\n")
 
-print("Completed writing reviews to file: " + len(reviews))
+print("Completed writing reviews to file: " + str(len(reviews))
 
 
