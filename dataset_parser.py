@@ -72,12 +72,19 @@ def searchTree(value, tree):
    else:
       return None
 
+def iterateTree(tree, iterator):
+  iterator(tree.value)
+  iterateTree(tree.left, iterator)
+  iterateTree(tree.right, iterator)
+
 def height(node):
     if node is None:
         return 0
     else:
         return max(height(node.left), height(node.right)) + 1
 
+
+BizSets = { "latenight": set([]) }
 
 businesses = []
 minReviewCount = 10
@@ -123,3 +130,9 @@ for line in revFile:
       fwrite.write(json.dumps(jsonLn) + "\n")
 
 print("Completed writing reviews to file: " + str(len(reviews)))
+
+for user in users:
+  if len(user["reviews"]) < 27:
+    users.remove(user)
+
+print("Restaurant reviewers selected: " + str(len(users)))
