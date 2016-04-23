@@ -2,17 +2,20 @@ import json
 import os.path
 
 class TreeNode(object):
-  def __init__(self, value, left, right):
+  def __init__(self, value, left, right, searchValue):
     self.value = value
     self.left = left
     self.right = right
+    self.searchValue = searchValue
+
+class UserBucket(object):
+  def __init__(self, value, left, right)
 
   def setChild(self, node, branch):
     if branch == "left":
       self.left = node
     else:
       self.right = node
-
 
 def mergeSort(alist, orderedLtoG):
     if len(alist)>1:
@@ -47,27 +50,27 @@ def mergeSort(alist, orderedLtoG):
 
 # @param num, a list of integers
 # @return a tree node
-def sortedArrayToBST(num):
-    return sortedArrayToBSTRec(num, 0, len(num)-1)
+def sortedArrayToBST(num, searchValue):
+    return sortedArrayToBSTRec(num, 0, len(num)-1, searchValue)
     
-def sortedArrayToBSTRec(num, begin, end):
+def sortedArrayToBSTRec(num, begin, end, searchValue):
     if begin>end:
         return None
     midPoint = (begin+end)//2
-    root = TreeNode(num[midPoint], None, None)
-    root.left = sortedArrayToBSTRec(num, begin, midPoint-1)
-    root.right = sortedArrayToBSTRec(num, midPoint+1,end)
+    root = TreeNode(num[midPoint], None, None, searchValue)
+    root.left = sortedArrayToBSTRec(num, begin, midPoint-1, searchValue)
+    root.right = sortedArrayToBSTRec(num, midPoint+1,end, searchValue)
     return root
 
 def searchTree(value, tree):
-   if value == tree.value:
-      return True
-   elif tree.left != None and value < tree.value:
+   if value == tree.searchValue(tree.value):
+      return tree.value
+   elif tree.left != None and value < tree.searchValue(tree.value):
       return searchTree(value, tree.left)
-   elif tree.right != None and tree.right < value:
+   elif tree.right != None and tree.searchValue(tree.value) < value:
       return searchTree(value, tree.right)
    else:
-      return False
+      return None
 
 def height(node):
     if node is None:
@@ -84,13 +87,13 @@ for line in bizFile:
    jsonLn = json.loads(line)
    for category in jsonLn["categories"]:
       if category == "Restaurants":
-         businesses.append(jsonLn["business_id"])
+         businesses.append(jsonLn)
          continue
 
 print("Restaurants identified: ", len(businesses))
-mergeSort(businesses, lambda left, right: left < right)
+mergeSort(businesses, lambda left, right: left["business_id"] < right["business_id"])
 print("Sorted restauraunt list")
-businessTree = sortedArrayToBST(businesses)
+businessTree = sortedArrayToBST(businesses, lambda value: value["business_id"])
 print("Treeified restaurant list: (height) ", height(businessTree))
 
 users = []
@@ -98,20 +101,25 @@ usrFile = open(os.path.dirname(__file__) + '/../yelp_academic_dataset_user.json'
 for line in usrFile:
    jsonLn = json.loads(line)
    if minReviewCount <= jsonLn["review_count"]:
-      users.append(jsonLn["user_id"])
+      users.append(jsonLn)
 
 print("Users selected: ", len(users))
-mergeSort(users, lambda left, right: left < right)
+mergeSort(users, lambda left, right: left["user_id"] < right["user_id"])
 print("Sorted user list")
-userTree = sortedArrayToBST(users)
+userTree = sortedArrayToBST(users, lambda value: value["user_id"])
 print("Treeified users list: (height) ", height(userTree))
 
 reviews = []
 revFile = open(os.path.dirname(__file__) + '/../yelp_academic_dataset_review.json')
+fwrite = open(os.path.dirname(__file__) + '/../consolidated_review_data.json', 'w+')
 for line in revFile:
    jsonLn = json.loads(line)
-   if searchTree(jsonLn["business_id"], businessTree) and searchTree(jsonLn["user_id"], userTree):
+   business = searchTree(jsonLn["business_id"], businessTree)
+   user = searchTree(jsonLn["user_id"], userTree)
+   if business != None and user != None :
       reviews.append(jsonLn)
+      fwrite.write(json.dumps(jsonLn) + "\n")
 
+print("Completed writing reviews to file: " + len(reviews))
 
 
