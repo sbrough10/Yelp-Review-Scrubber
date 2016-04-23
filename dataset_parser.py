@@ -97,6 +97,7 @@ for line in bizFile:
          businesses.append(jsonLn)
          continue
 
+# Sorting and treeifying of business data
 print("Restaurants identified: ", len(businesses))
 mergeSort(businesses, lambda left, right: left["business_id"] < right["business_id"])
 print("Sorted restauraunt list")
@@ -111,31 +112,30 @@ for line in usrFile:
       users.append(jsonLn)
       jsonLn["reviews"] = []
 
+# Sorting and treeifying of user data
 print("Users selected: ", len(users))
 mergeSort(users, lambda left, right: left["user_id"] < right["user_id"])
 print("Sorted user list")
 userTree = sortedArrayToBST(users, lambda value: value["user_id"])
 print("Treeified users list: (height) ", height(userTree))
 
-reviews = []
 revFile = open(os.path.dirname(__file__) + '/../yelp_academic_dataset_review.json')
-fwrite = open(os.path.dirname(__file__) + '/../consolidated_review_data.json', 'w+')
 for line in revFile:
    jsonLn = json.loads(line)
    business = searchTree(jsonLn["business_id"], businessTree)
    user = searchTree(jsonLn["user_id"], userTree)
    if business != None and user != None:
-      user["reviews"].append(jsonLn)
-      reviews.append(jsonLn)
-      fwrite.write(json.dumps(jsonLn) + "\n")
+      user["reviews"].append(jsonLn)]
 
-print("Completed writing reviews to file: " + str(len(reviews)))
+print("Reviews matched: " + str(len(reviews)))
 
-for user in users:
-  if len(user["reviews"]) < 27:
-    users.remove(user)
+users = mergeSort(users, lambda left, right: len(left["reviews"]) < len(right["reviews"]))
+print("Users sorted: " + str(len(users)))
 
-print("Restaurant reviewers selected: " + str(len(users)))
+for i in xrange(0, len(users) - 1):
+  if len(user[i]["reviews"]) < 27:
+    users = users[i:len(users)]
 
-userTree = sortedArrayToBST(users, lambda value: len(value["reviews"]))
+print("Restaurant reviewers narrowed: " + str(len(users)))
+
 
