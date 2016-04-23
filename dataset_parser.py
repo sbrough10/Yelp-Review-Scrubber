@@ -127,6 +127,4 @@ for line in revFile:
       reviews.append(jsonLn)
       fwrite.write(json.dumps(jsonLn) + "\n")
 
-print("Completed writing reviews to file: " + str(len(reviews))
-
-
+print("Completed writing reviews to file: " + str(len(reviews)))
