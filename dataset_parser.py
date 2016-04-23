@@ -136,3 +136,6 @@ for user in users:
     users.remove(user)
 
 print("Restaurant reviewers selected: " + str(len(users)))
+
+userTree = sortedArrayToBST(users, lambda value: len(value["reviews"]))
+
