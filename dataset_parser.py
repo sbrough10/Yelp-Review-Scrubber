@@ -1,5 +1,8 @@
 import json
 import os.path
+import nilima
+import twyla
+import christina
 
 class TreeNode(object):
   def __init__(self, value, left, right, searchValue):
@@ -52,7 +55,9 @@ def mergeSort(alist, orderedLtoG):
 # @return a tree node
 def sortedArrayToBST(num, searchValue):
     return sortedArrayToBSTRec(num, 0, len(num)-1, searchValue)
-    
+
+
+# Function to convert array to binary tree
 def sortedArrayToBSTRec(num, begin, end, searchValue):
     if begin>end:
         return None
@@ -125,7 +130,7 @@ for line in revFile:
    business = searchTree(jsonLn["business_id"], businessTree)
    user = searchTree(jsonLn["user_id"], userTree)
    if business != None and user != None:
-      user["reviews"].append(jsonLn)]
+      user["reviews"].append(jsonLn)
 
 print("Reviews matched: " + str(len(reviews)))
 
@@ -137,5 +142,3 @@ for i in xrange(0, len(users) - 1):
     users = users[i:len(users)]
 
 print("Restaurant reviewers narrowed: " + str(len(users)))
-
-
