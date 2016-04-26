@@ -1,44 +1,35 @@
 import json
 import os.path
-import nilima
-import twyla
-import christina
+import math
 
-class TreeNode(object):
-  def __init__(self, value, left, right, searchValue):
-    self.value = value
-    self.left = left
-    self.right = right
-    self.searchValue = searchValue
-
-  def addReview(self, review):
-    self.reviews.append(review)
-
-def setChild(self, node, branch):
-  if branch == "left":
-    self.left = node
-  else:
-    self.right = node
-
-def mergeSort(alist, orderedLtoG):
-    if len(alist)>1:
+#sorts array by userid or businessid
+def mergeSort(alist, ids):
+    if len(alist) > 1:
         mid = len(alist)//2
         lefthalf = alist[:mid]
         righthalf = alist[mid:]
-
-        mergeSort(lefthalf, orderedLtoG)
-        mergeSort(righthalf, orderedLtoG)
+        
+        mergeSort(lefthalf, ids)
+        mergeSort(righthalf, ids)
 
         i=0
         j=0
         k=0
         while i < len(lefthalf) and j < len(righthalf):
-            if orderedLtoG(lefthalf[i], righthalf[j]):
-                alist[k]=lefthalf[i]
-                i=i+1
-            else:
-                alist[k]=righthalf[j]
-                j=j+1
+            if (ids == 'business_id'): #by business_id
+              if (lefthalf[i].business_id < righthalf[j].business_id):
+                  alist[k]=lefthalf[i]
+                  i=i+1
+              else:
+                  alist[k]=righthalf[j]
+                  j=j+1
+            else: #by user_id
+                if (lefthalf[i].user_id < righthalf[j].user_id):
+                  alist[k]=lefthalf[i]
+                  i=i+1
+                else:
+                  alist[k]=righthalf[j]
+                  j=j+1
             k=k+1
 
         while i < len(lefthalf):
@@ -50,95 +41,121 @@ def mergeSort(alist, orderedLtoG):
             alist[k]=righthalf[j]
             j=j+1
             k=k+1
+  
 
-# @param num, a list of integers
-# @return a tree node
-def sortedArrayToBST(num, searchValue):
-    return sortedArrayToBSTRec(num, 0, len(num)-1, searchValue)
+#binary search by userid (must be sorted by userid)
+def binary_search(value, alist, ids):
+    last = len(alist) - 1
+    first = 0
+    found = None
+    
+
+    if (ids == 'user_id'): #by user_id
+        while first <= last and not found:
+           midpoint = (first + last) // 2
+           if (alist[midpoint].user_id == value):
+               found = True
+           else:
+                if (value < alist[midpoint].user_id):
+                    last = midpoint - 1
+                else:
+                    first = midpoint + 1
+        return found
+
+    else: #by business_id
+        while first <= last and not found:
+            midpoint = (first + last) // 2
+            if alist[midpoint].business_id == value:
+               found = True
+            else:
+                if value < alist[midpoint].business_id:
+                    last = midpoint - 1
+                else:
+                    first = midpoint+1
+        return found
+       
+      
+class User(object):
+  def __init__(user, user_id, name, review_count, average_stars, reviews):
+    #User attributes
+    user.user_id = user_id
+    user.name = name
+    user.review_count = review_count
+    user.average_stars = average_stars
+    user.reviews = reviews
+
+class Businesses(object):
+   def __init__(business, business_id, categories, city, review_count, name, neighborhoods, stars, attributes):
+    #Business attributes
+    business.business_id = business_id
+    business.categories = categories
+    business.city = city
+    business.review_count = review_count
+    business.name = name
+    business.neighborhoods = neighborhoods
+    business.stars = stars
+    business.attributes = attributes
+    
+class Reviews(object):
+  def __init__(review, user_id, stars, business_id):
+    #Review attributes
+    review.user_id = user_id
+    review.stars = stars
+    review.business_id = business_id
 
 
-# Function to convert array to binary tree
-def sortedArrayToBSTRec(num, begin, end, searchValue):
-    if begin>end:
-        return None
-    midPoint = (begin+end)//2
-    root = TreeNode(num[midPoint], None, None, searchValue)
-    root.left = sortedArrayToBSTRec(num, begin, midPoint-1, searchValue)
-    root.right = sortedArrayToBSTRec(num, midPoint+1,end, searchValue)
-    return root
-
-def searchTree(value, tree):
-   if value == tree.searchValue(tree.value):
-      return tree.value
-   elif tree.left != None and value < tree.searchValue(tree.value):
-      return searchTree(value, tree.left)
-   elif tree.right != None and tree.searchValue(tree.value) < value:
-      return searchTree(value, tree.right)
-   else:
-      return None
-
-def iterateTree(tree, iterator):
-  iterator(tree.value)
-  iterateTree(tree.left, iterator)
-  iterateTree(tree.right, iterator)
-
-def height(node):
-    if node is None:
-        return 0
-    else:
-        return max(height(node.left), height(node.right)) + 1
-
-
-BizSets = { "latenight": set([]) }
-
-businesses = []
 minReviewCount = 10
+#get array of users with at least the minReviewCount
+users = []
+usrFile = open('yelp_academic_dataset_user.json')
+for line in usrFile:
+   jsonLn = json.loads(line)
+   if minReviewCount <= jsonLn["review_count"]:
+       users.append(User(jsonLn["user_id"],jsonLn["name"],jsonLn["review_count"],jsonLn["average_stars"], []))
 
-bizFile = open(os.path.dirname(__file__) + '/../yelp_academic_dataset_business.json')
+      
+#get array of businesses
+businesses = []
+bizFile = open('yelp_academic_dataset_business.json')
 for line in bizFile:
    jsonLn = json.loads(line)
    for category in jsonLn["categories"]:
       if category == "Restaurants":
-         businesses.append(jsonLn)
-         continue
+        businesses.append(Businesses(jsonLn["business_id"], jsonLn["categories"], jsonLn["city"], jsonLn["review_count"], jsonLn["name"], jsonLn["neighborhoods"], jsonLn["stars"], jsonLn["attributes"])) 
 
-# Sorting and treeifying of business data
+# Sorting business data by business_id
 print("Restaurants identified: ", len(businesses))
-mergeSort(businesses, lambda left, right: left["business_id"] < right["business_id"])
+mergeSort(businesses, 'business_id')
 print("Sorted restauraunt list")
-businessTree = sortedArrayToBST(businesses, lambda value: value["business_id"])
-print("Treeified restaurant list: (height) ", height(businessTree))
 
-users = []
-usrFile = open(os.path.dirname(__file__) + '/../yelp_academic_dataset_user.json')
-for line in usrFile:
-   jsonLn = json.loads(line)
-   if minReviewCount <= jsonLn["review_count"]:
-      users.append(jsonLn)
-      jsonLn["reviews"] = []
 
-# Sorting and treeifying of user data
+# Sorting user data by user_id
 print("Users selected: ", len(users))
-mergeSort(users, lambda left, right: left["user_id"] < right["user_id"])
+mergeSort(users, 'user_id')
 print("Sorted user list")
-userTree = sortedArrayToBST(users, lambda value: value["user_id"])
-print("Treeified users list: (height) ", height(userTree))
 
-revFile = open(os.path.dirname(__file__) + '/../yelp_academic_dataset_review.json')
+
+#get array of reviews
+revFile = open('yelp_academic_dataset_review.json')
+reviews = []
 for line in revFile:
    jsonLn = json.loads(line)
-   business = searchTree(jsonLn["business_id"], businessTree)
-   user = searchTree(jsonLn["user_id"], userTree)
+   business = binary_search(jsonLn["business_id"], businesses, 'business_id')
+   user = binary_search(jsonLn["user_id"], users, 'user_id')
    if business != None and user != None:
-      user["reviews"].append(jsonLn)
+      reviews.append(Reviews(jsonLn["user_id"], jsonLn["stars"], jsonLn["business_id"]))
 
-print("Reviews matched: " + str(len(reviews)))
 
-users = mergeSort(users, lambda left, right: len(left["reviews"]) < len(right["reviews"]))
-print("Users sorted: " + str(len(users)))
+      
+#sort reviews by user
+print("Reviews selected: ", len(reviews))
+mergeSort(reviews, 'user_id')
+print("Sorted reviews")
 
-for i in xrange(0, len(users) - 1):
-  if len(user[i]["reviews"]) < 27:
-    users = users[i:len(users)]
+j = 0
 
-print("Restaurant reviewers narrowed: " + str(len(users)))
+for i in range (0, len(reviews) - 1):
+    while (users[j].user_id != reviews[i].user_id):
+        j = j + 1
+    if (j < len(users)):
+        users[j].reviews.append(reviews[i])
