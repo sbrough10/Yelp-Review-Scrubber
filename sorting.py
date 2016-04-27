@@ -69,3 +69,22 @@ def binary_search(value, alist, ids):
                 else:
                     first = midpoint+1
         return found
+
+
+def getUserCity(user):
+   reviews = user.reviews
+   cities = {}
+   for review in reviews:
+      city = review.business.city
+      if city not in cities:
+         cities[city] = 0
+      cities[city] = cities[city] + 1
+
+   maxCity = None
+   maxStars = 0
+   for city in cities:
+      if maxCity == None or maxStars < cities[city]:
+         maxCity = city
+         maxStars = cities[city]
+
+   return maxCity
