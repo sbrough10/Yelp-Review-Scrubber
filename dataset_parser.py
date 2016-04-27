@@ -2,6 +2,10 @@ import json
 import os.path
 import math
 
+#allows object to be printed in json file
+def jdefault(o):
+    return o.__dict__
+
 #sorts array by userid or businessid
 def mergeSort(alist, ids):
     if len(alist) > 1:
@@ -114,7 +118,7 @@ for line in usrFile:
        users.append(User(jsonLn["user_id"],jsonLn["name"],jsonLn["review_count"],jsonLn["average_stars"], []))
 
       
-#get array of businesses
+#get array of restaurants and write to file
 businesses = []
 bizFile = open('yelp_academic_dataset_business.json')
 for line in bizFile:
@@ -122,7 +126,13 @@ for line in bizFile:
    for category in jsonLn["categories"]:
       if category == "Restaurants":
         businesses.append(Businesses(jsonLn["business_id"], jsonLn["categories"], jsonLn["city"], jsonLn["review_count"], jsonLn["name"], jsonLn["neighborhoods"], jsonLn["stars"], jsonLn["attributes"])) 
+#writes to file
+with open('Restaurants.json', 'w') as outfile:
+    for i in range(0, len(businesses) - 1):
+        jsonData = (json.dumps(businesses[i], default=jdefault))
+        outfile.write(jsonData + '\n')
 
+    
 # Sorting business data by business_id
 print("Restaurants identified: ", len(businesses))
 mergeSort(businesses, 'business_id')
@@ -134,7 +144,6 @@ print("Users selected: ", len(users))
 mergeSort(users, 'user_id')
 print("Sorted user list")
 
-
 #get array of reviews
 revFile = open('yelp_academic_dataset_review.json')
 reviews = []
@@ -145,13 +154,13 @@ for line in revFile:
    if business != None and user != None:
       reviews.append(Reviews(jsonLn["user_id"], jsonLn["stars"], jsonLn["business_id"]))
 
-
       
 #sort reviews by user
 print("Reviews selected: ", len(reviews))
 mergeSort(reviews, 'user_id')
 print("Sorted reviews")
 
+#connect reviews to each user
 j = 0
 for i in range (0, len(reviews) - 1):
     while (users[j].user_id != reviews[i].user_id):
@@ -160,7 +169,7 @@ for i in range (0, len(reviews) - 1):
         users[j].reviews.append(reviews[i])
 
 
-#get users with average amount of reviews provided
+#get users with the average amount of reviews provided
 k = 0
 
 for i in range(0, len(users) - 1):
@@ -175,9 +184,17 @@ for i in range(0, len(users) - 1):
     if (len(users[i].reviews) >= minReviewCount):
         users_avg.append(users[i])
         
-print(len(users_avg))
+print("New users selected: ", len(users_avg))
 
-    
+#writes users to file
+with open('Recommend_Users.json', 'w') as outfile:
+    for i in range(0, len(users_avg) - 1):
+        jsonData = (json.dumps(users_avg[i], default=jdefault))
+        outfile.write(jsonData + '\n')
+
+
+
+
     
 
 
