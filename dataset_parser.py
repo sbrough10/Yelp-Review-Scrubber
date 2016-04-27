@@ -27,13 +27,16 @@ def mergeSort(alist, ids):
               else:
                   alist[k]=righthalf[j]
                   j=j+1
-            else: #by user_id
+            elif (ids == 'user_id'): #by user_id
                 if (lefthalf[i].user_id < righthalf[j].user_id):
                   alist[k]=lefthalf[i]
                   i=i+1
                 else:
                   alist[k]=righthalf[j]
                   j=j+1
+            else: #ids entered incorrectly
+                print("Sort unsuccessful, id type not recognized")
+                return None
             k=k+1
 
         while i < len(lefthalf):
@@ -66,7 +69,7 @@ def binary_search(value, alist, ids):
                     first = midpoint + 1
         return found
 
-    else: #by business_id
+    elif (ids == 'business_id'): #by business_id
         while first <= last and not found:
             midpoint = (first + last) // 2
             if alist[midpoint].business_id == value:
@@ -77,7 +80,8 @@ def binary_search(value, alist, ids):
                 else:
                     first = midpoint+1
         return found
-       
+    else: #neither business_id or user_id
+          print("Search unsuccessful, id type entered not recognized")
       
 class User(object):
   def __init__(user, user_id, name, review_count, average_stars, reviews):
