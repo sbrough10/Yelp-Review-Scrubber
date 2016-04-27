@@ -104,7 +104,7 @@ class Reviews(object):
     review.business_id = business_id
 
 
-minReviewCount = 10
+minReviewCount = 27
 #get array of users with at least the minReviewCount
 users = []
 usrFile = open('yelp_academic_dataset_user.json')
@@ -153,13 +153,32 @@ mergeSort(reviews, 'user_id')
 print("Sorted reviews")
 
 j = 0
-
 for i in range (0, len(reviews) - 1):
     while (users[j].user_id != reviews[i].user_id):
         j = j + 1
     if (j < len(users)):
         users[j].reviews.append(reviews[i])
-   
+
+
+#get users with average amount of reviews provided
+k = 0
+
+for i in range(0, len(users) - 1):
+    k = k + (len(users[i].reviews))
+
+average = k // len(users)
+print("Average: ", average)
+
+k = 0
+users_avg = []
+for i in range(0, len(users) - 1):
+    if (len(users[i].reviews) >= minReviewCount):
+        users_avg.append(users[i])
+        
+print(len(users_avg))
+
+    
+    
 
 
 
