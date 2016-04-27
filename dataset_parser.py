@@ -107,97 +107,93 @@ class Reviews(object):
     review.stars = stars
     review.business_id = business_id
 
+#get array of users from filename with at least the minReviewCount
+def getUsers(minReviewCount, filename):
+    users = []
+    usrFile = open(filename)
+    for line in usrFile:
+       jsonLn = json.loads(line)
+       if minReviewCount <= jsonLn["review_count"]:
+           users.append(User(jsonLn["user_id"],jsonLn["name"],jsonLn["review_count"], jsonLn["average_stars"], []))
+    return users
 
-minReviewCount = 27
+#get array of businesses from filename
+def getBusinesses(filename):
+    businesses = []
+    bizFile = open(filename)
+    for line in bizFile:
+        jsonLn = json.loads(line)
+        for category in jsonLn["categories"]:
+            if category == "Restaurants":
+                businesses.append(Businesses(jsonLn["business_id"], jsonLn["categories"], jsonLn["city"], jsonLn["review_count"], jsonLn["name"], jsonLn["neighborhoods"], jsonLn["stars"], jsonLn["attributes"]))
+    return businesses
+
+#get array of reviews that are provided for the specified users and businesses
+def getReviews(filename, users, businesses):
+    revFile = open(filename)
+    reviews = []
+    for line in revFile:
+        jsonLn = json.loads(line)
+        business = binary_search(jsonLn["business_id"], businesses, 'business_id')
+        user = binary_search(jsonLn["user_id"], users, 'user_id')
+        if business != None and user != None:
+            reviews.append(Reviews(jsonLn["user_id"], jsonLn["stars"], jsonLn["business_id"]))
+    return reviews
+
+#write data to json file 
+def data_toJson(alist, filename, length):
+    with open(filename, 'w') as outfile:
+        for i in range(0, length - 1):
+            jsonData = (json.dumps(alist[i], default=jdefault))
+            outfile.write(jsonData + '\n')
+
+#connect reviews to each user
+def connectReviews(reviews, users):
+    j = 0
+    for i in range (0, len(reviews) - 1):
+        while (users[j].user_id != reviews[i].user_id):
+            j = j + 1
+        if (j < len(users)):
+            users[j].reviews.append(reviews[i])
+    return users
+
+#reduces users to only those with minReviewLength or more provided
+def reduceUsers(users):
+    users2 = []
+    for i in range(0, len(users) - 1):
+        if (len(users[i].reviews) >= minReviewCount):
+            users2.append(users[i])
+    return users2
+
 #get array of users with at least the minReviewCount
-users = []
-usrFile = open('yelp_academic_dataset_user.json')
-for line in usrFile:
-   jsonLn = json.loads(line)
-   if minReviewCount <= jsonLn["review_count"]:
-       users.append(User(jsonLn["user_id"],jsonLn["name"],jsonLn["review_count"],jsonLn["average_stars"], []))
-
-      
+minReviewCount = 27
+users = getUsers(minReviewCount, 'yelp_academic_dataset_user.json')
+     
 #get array of restaurants and write to file
-businesses = []
-bizFile = open('yelp_academic_dataset_business.json')
-for line in bizFile:
-   jsonLn = json.loads(line)
-   for category in jsonLn["categories"]:
-      if category == "Restaurants":
-        businesses.append(Businesses(jsonLn["business_id"], jsonLn["categories"], jsonLn["city"], jsonLn["review_count"], jsonLn["name"], jsonLn["neighborhoods"], jsonLn["stars"], jsonLn["attributes"])) 
-#writes to file
-with open('Restaurants.json', 'w') as outfile:
-    for i in range(0, len(businesses) - 1):
-        jsonData = (json.dumps(businesses[i], default=jdefault))
-        outfile.write(jsonData + '\n')
-
+businesses = getBusinesses('yelp_academic_dataset_business.json')
+data_toJson(businesses, 'Restaurants.json', len(businesses))
     
-# Sorting business data by business_id
+#Sorting business data by business_id
 print("Restaurants identified: ", len(businesses))
 mergeSort(businesses, 'business_id')
 print("Sorted restauraunt list")
-
 
 # Sorting user data by user_id
 print("Users selected: ", len(users))
 mergeSort(users, 'user_id')
 print("Sorted user list")
 
-#get array of reviews
-revFile = open('yelp_academic_dataset_review.json')
-reviews = []
-for line in revFile:
-   jsonLn = json.loads(line)
-   business = binary_search(jsonLn["business_id"], businesses, 'business_id')
-   user = binary_search(jsonLn["user_id"], users, 'user_id')
-   if business != None and user != None:
-      reviews.append(Reviews(jsonLn["user_id"], jsonLn["stars"], jsonLn["business_id"]))
-
-      
-#sort reviews by user
+#get array of reviews and sort by user
+reviews = getReviews('yelp_academic_dataset_review.json', users, businesses)
 print("Reviews selected: ", len(reviews))
 mergeSort(reviews, 'user_id')
 print("Sorted reviews")
 
-#connect reviews to each user
-j = 0
-for i in range (0, len(reviews) - 1):
-    while (users[j].user_id != reviews[i].user_id):
-        j = j + 1
-    if (j < len(users)):
-        users[j].reviews.append(reviews[i])
+#connect reviews to each user and discard users with less than minReviewCount
+#associated to it 
+users = connectReviews(reviews, users)
+selected_users = reduceUsers(users)
+print("New users selected: ", len(selected_users))
 
-
-#get users with the average amount of reviews provided
-k = 0
-
-for i in range(0, len(users) - 1):
-    k = k + (len(users[i].reviews))
-
-average = k // len(users)
-print("Average: ", average)
-
-k = 0
-users_avg = []
-for i in range(0, len(users) - 1):
-    if (len(users[i].reviews) >= minReviewCount):
-        users_avg.append(users[i])
-        
-print("New users selected: ", len(users_avg))
-
-#writes users to file
-with open('Recommend_Users.json', 'w') as outfile:
-    for i in range(0, len(users_avg) - 1):
-        jsonData = (json.dumps(users_avg[i], default=jdefault))
-        outfile.write(jsonData + '\n')
-
-
-
-
-    
-
-
-
-
-    
+#writes selected users to file
+data_toJson(selected_users, 'Recommend_Users.json', len(selected_users))
