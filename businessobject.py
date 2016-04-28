@@ -13,7 +13,6 @@ for line in f:
         if category == "Restaurants":
             data.append(jsonLn)
             continue
-data["relattributes"] = set()
         
 ## Convert business dicts to list of objects        
 class Struct(object):
@@ -22,7 +21,7 @@ class Struct(object):
 
 businesses = []
 for number in data:
-    businesses.append(Struct(**number),attrset)
+    businesses.append(Struct(**number))
 
 ## Create a list of sets of relevant attributes for each business
 relattr = []
@@ -70,17 +69,17 @@ for business in businesses:
     # Star Rating
     if business.stars <= 2:
         attrset.add('star-low')
-    if business.stars <= 3 and business.stars >= 2:
+    if business.stars == 3:
         attrset.add('star-med')
     if business.stars >= 4:
         attrset.add('star-high')
     # Price Range
     if 'Price Range' in business.attributes:
-        if business.attributes['Price Range'] == 1 or business.attributes['Price Range'] == 2:
+        if business.attributes['Price Range'] == 1:
             attrset.add('price-low')
         if business.attributes['Price Range'] == 2 or business.attributes['Price Range'] == 3:
             attrset.add('price-med')
-        if business.attributes['Price Range'] == 3 or business.attributes['Price Range'] == 4:
+        if business.attributes['Price Range'] == 4:
             attrset.add('price-high')
     # Ambience
      #ambience = []
@@ -115,3 +114,7 @@ for business in businesses:
         attrset.add(category)
     # Add set to list
     relattr.append(attrset)
+
+    # Add set to object
+    business.attributeset = attrset;
+    
