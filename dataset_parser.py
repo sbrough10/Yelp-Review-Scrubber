@@ -6,7 +6,7 @@ import math
 def jdefault(o):
     return o.__dict__
 
-#sorts array by userid or businessid
+#sorts array by userid or businessid based off ids
 def mergeSort(alist, ids):
     if len(alist) > 1:
         mid = len(alist)//2
@@ -22,32 +22,32 @@ def mergeSort(alist, ids):
         while i < len(lefthalf) and j < len(righthalf):
             if (ids == 'business_id'): #by business_id
               if (lefthalf[i].business_id < righthalf[j].business_id):
-                  alist[k]=lefthalf[i]
-                  i=i+1
+                  alist[k] = lefthalf[i]
+                  i = i + 1
               else:
-                  alist[k]=righthalf[j]
-                  j=j+1
+                  alist[k] = righthalf[j]
+                  j = j + 1
             elif (ids == 'user_id'): #by user_id
                 if (lefthalf[i].user_id < righthalf[j].user_id):
-                  alist[k]=lefthalf[i]
-                  i=i+1
+                  alist[k] = lefthalf[i]
+                  i = i + 1
                 else:
-                  alist[k]=righthalf[j]
-                  j=j+1
+                  alist[k] = righthalf[j]
+                  j = j + 1
             else: #ids entered incorrectly
                 print("Sort unsuccessful, id type not recognized")
                 return None
-            k=k+1
+            k = k + 1
 
         while i < len(lefthalf):
-            alist[k]=lefthalf[i]
-            i=i+1
-            k=k+1
+            alist[k] = lefthalf[i]
+            i = i + 1
+            k = k + 1
 
         while j < len(righthalf):
-            alist[k]=righthalf[j]
-            j=j+1
-            k=k+1
+            alist[k] = righthalf[j]
+            j = j + 1
+            k = k + 1
   
 
 #binary search by userid (must be sorted by userid)
@@ -78,20 +78,21 @@ def binary_search(value, alist, ids):
                 if value < alist[midpoint].business_id:
                     last = midpoint - 1
                 else:
-                    first = midpoint+1
+                    first = midpoint + 1
         return found
     else: #neither business_id or user_id
           print("Search unsuccessful, id type entered not recognized")
       
 class User(object):
-  def __init__(user, user_id, name, review_count, average_stars, reviews):
+  def __init__(user, user_id, name, review_count, average_stars, reviews, badreviews):
     #User attributes
     user.user_id = user_id
     user.name = name
     user.review_count = review_count
     user.average_stars = average_stars
     user.reviews = reviews
-
+    user.badreviews = badreviews
+    
 class Businesses(object):
    def __init__(business, business_id, categories, city, review_count, name, neighborhoods, stars, attributes):
     #Business attributes
@@ -118,7 +119,7 @@ def getUsers(minReviewCount, filename):
     for line in usrFile:
        jsonLn = json.loads(line)
        if minReviewCount <= jsonLn["review_count"]:
-           users.append(User(jsonLn["user_id"],jsonLn["name"],jsonLn["review_count"], jsonLn["average_stars"], []))
+           users.append(User(jsonLn["user_id"],jsonLn["name"],jsonLn["review_count"], jsonLn["average_stars"], [], []))
     return users
 
 #get array of businesses from filename
@@ -157,12 +158,14 @@ def connectReviews(reviews, users):
     for i in range (0, len(reviews) - 1):
         while (users[j].user_id != reviews[i].user_id):
             j = j + 1
-        if (j < len(users)):
+        if ((j < len(users)) & (reviews[i].stars >= 3)): 
             users[j].reviews.append(reviews[i])
+        elif ((j < len(users)) & (reviews[i].stars < 3)): #businesses user did not like
+            users[j].badreviews.append(reviews[i])
     return users
 
 #reduces users to only those with minReviewLength or more provided
-def reduceUsers(users):
+def reduceUsers(users, minReviewCount):
     users2 = []
     for i in range(0, len(users) - 1):
         if (len(users[i].reviews) >= minReviewCount):
@@ -196,7 +199,7 @@ print("Sorted reviews")
 #connect reviews to each user and discard users with less than minReviewCount
 #associated to it 
 users = connectReviews(reviews, users)
-selected_users = reduceUsers(users)
+selected_users = reduceUsers(users, minReviewCount)
 print("New users selected: ", len(selected_users))
 
 #writes selected users to file
