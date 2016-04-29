@@ -1,6 +1,9 @@
 import json
 import os.path
 import math
+import businessobject
+import ideal_set
+import comparesets
 
 #sorts array by userid or businessid
 def mergeSort(alist, ids):
@@ -84,17 +87,9 @@ class User(object):
     user.average_stars = average_stars
     user.reviews = reviews
 
-class Businesses(object):
-   def __init__(business, business_id, categories, city, review_count, name, neighborhoods, stars, attributes):
-    #Business attributes
-    business.business_id = business_id
-    business.categories = categories
-    business.city = city
-    business.review_count = review_count
-    business.name = name
-    business.neighborhoods = neighborhoods
-    business.stars = stars
-    business.attributes = attributes
+class Business(object):
+    def __init__(self, **entries):
+        self.__dict__.update(entries)
     
 class Reviews(object):
   def __init__(review, user_id, stars, business_id):
@@ -115,13 +110,18 @@ for line in usrFile:
 
       
 #get array of businesses
-businesses = []
+data = []
 bizFile = open('yelp_academic_dataset_business.json')
 for line in bizFile:
    jsonLn = json.loads(line)
    for category in jsonLn["categories"]:
       if category == "Restaurants":
-        businesses.append(Businesses(jsonLn["business_id"], jsonLn["categories"], jsonLn["city"], jsonLn["review_count"], jsonLn["name"], jsonLn["neighborhoods"], jsonLn["stars"], jsonLn["attributes"])) 
+        data.append(jsonLn)
+        
+businesses = []
+for number in data:
+    businesses.append(Business(**number))
+    
 
 # Sorting business data by business_id
 print("Restaurants identified: ", len(businesses))
@@ -145,7 +145,6 @@ for line in revFile:
    if business != None and user != None:
       reviews.append(Reviews(jsonLn["user_id"], jsonLn["stars"], jsonLn["business_id"]))
 
-
       
 #sort reviews by user
 print("Reviews selected: ", len(reviews))
@@ -159,7 +158,32 @@ for i in range (0, len(reviews) - 1):
         j = j + 1
     if (j < len(users)):
         users[j].reviews.append(reviews[i])
-   
+
+
+#create list of business sets
+businessobject.createbusinessset(businesses)
+print("Created business sets")
+
+#create user set
+ideal_set.idealset(users[1])
+print("Create user set for user 1")
+
+#compare user set to business sets and create list
+comparisons = []
+for business in businesses:
+    comparisons.append(comparesets.matchsets(ideaset, business.attributeset, business.business_id))
+    
+#sort list
+def getKey(item):
+    return item[1]
+sorted(comparisons, key=getKey, reverse=True)
+
+#print suggestions
+print "Suggested Businesses: ", comparisons[0:9]
+
+
+
+
 
 
 
