@@ -26,7 +26,8 @@ def idealset(user, businessarray):
         #find business_id from review
         b_id = review.business_id
         
-        business = [item for item in businessarray if item.business_id == b_id]
+        businessar = [item for item in businessarray if item.business_id == b_id]
+        business = businessar[0]
         if hasattr(business, 'attributeset'):
             print b_id
             # Late night

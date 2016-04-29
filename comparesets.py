@@ -8,8 +8,10 @@ import csv
 def matchsets(userset, businessset, business_id):
     nummatch = []
     nummatch.append(business_id)
-    userset &= businessset
-    nummatch.append(len(userset))
+    matchset = []
+    
+    matchset = userset.intersection(businessset)
+    nummatch.append(len(matchset))
     return nummatch
 
 

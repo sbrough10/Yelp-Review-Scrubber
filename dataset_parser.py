@@ -174,14 +174,12 @@ print("Created user set for user_id 'rpOyqD_893cqmDAtJLbdog'")
 comparisons = []
 for business in businesses:
     comparisons.append(comparesets.matchsets(idealset, business.attributeset, business.business_id))
-    
+
 #sort list
-def getKey(item):
-    return item[1]
-sorted(comparisons, key=getKey, reverse=True)
+suggestions = sorted(comparisons, key=lambda x: int(x[1]), reverse=True)
 
 #print suggestions
-print "Suggested Businesses: ", comparisons[0:9]
+print "Suggested Businesses: ", suggestions[0:9]
 
 
 
