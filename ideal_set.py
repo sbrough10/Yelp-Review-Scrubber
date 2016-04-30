@@ -21,15 +21,17 @@ def idealset(user, businessarray):
     price = ['1']
     ambience = ['1']
     typefood = ['1']
+    print "\nBased on user's reviews of these businesses: \n"
     for review in user.reviews:
-        
+      
         #find business_id from review
         b_id = review.business_id
         
         businessar = [item for item in businessarray if item.business_id == b_id]
         business = businessar[0]
+        print business.name
         if hasattr(business, 'attributeset'):
-            print b_id
+            ##print b_id
             # Late night
             if 'latenight-true' in business.attributeset:
                 latenight+=1

@@ -164,23 +164,40 @@ for i in range (0, len(reviews) - 1):
 businessobject.createbusinessset(businesses)
 print("Created business sets")
 
-#create user set
-idealset = set()
-user = [item for item in users if item.user_id == 'rpOyqD_893cqmDAtJLbdog']
-idealset = ideal_set.idealset(user[0], businesses)
-print("Created user set for user_id 'rpOyqD_893cqmDAtJLbdog'")
+def GenerateRecommendations():
+    while True:
+        #create user set
+        idealset = set()
+        print "\n"
+        userid = raw_input("Enter User_ID: ")
+        user = [item for item in users if item.user_id == userid]
+        if not user:
+            print "\nInvalid User_ID\n"
+            GenerateRecommendations()
+        print "\nGenerating recommendations for user: %s\n" % user[0].name
+        
+        idealset = ideal_set.idealset(user[0], businesses)
+        
 
-#compare user set to business sets and create list
-comparisons = []
-for business in businesses:
-    comparisons.append(comparesets.matchsets(idealset, business.attributeset, business.business_id))
+        #compare user set to business sets and create list
+        comparisons = []
+        for business in businesses:
+            comparisons.append(comparesets.matchsets(idealset, business.attributeset, business.business_id))
 
-#sort list
-suggestions = sorted(comparisons, key=lambda x: int(x[1]), reverse=True)
+        #sort list
+        suggestions = sorted(comparisons, key=lambda x: int(x[1]), reverse=True)
 
-#print suggestions
-print "Suggested Businesses: ", suggestions[0:9]
+        #print suggestions
+        print "\nRecommended Businesses: \n"
 
+        for biz in suggestions[0:9]:
+            busar = [item for item in businesses if item.business_id == biz[0] ]
+            bus = busar[0]
+            print bus.name 
+
+        print "\n\n\n"
+
+GenerateRecommendations()
 
 
 
